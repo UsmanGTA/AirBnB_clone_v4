@@ -24,6 +24,6 @@ header {
 }
 
 /* Dynamically added to #api_status div overriding the background-color */
-.available {
+#api_status.available {
 	background-color: #ff545f;
 }
