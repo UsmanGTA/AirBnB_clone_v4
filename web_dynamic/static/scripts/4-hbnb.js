@@ -1,5 +1,7 @@
 // Check if the HTML/CSS has been loaded
 $(document).ready(() => {
+  let global_amenities = {};
+
   // Check the API status and return status
   $.getJSON('http://0.0.0.0:5001/api/v1/status/', json => {
     if (json.status === 'OK') {
@@ -28,6 +30,7 @@ $(document).ready(() => {
     } else {
       $('.amenities h4').text('');
     }
+    global_amenities = ids;
   });
 
   $.ajax({
@@ -67,5 +70,36 @@ $(document).ready(() => {
       if (number !== 1) { return 's'; } else { return ''; }
     }
 
+    $('button').click(() => {
+      const post_data = JSON.stringify({ amenities: Object.keys(global_amenities) });
+      $.ajax({
+        url: 'http://0.0.0.0:5001/api/v1/places_search/',
+        type: 'post',
+        data: post_data,
+        headers: { 'Content-Type': 'application/json' }
+      }).done((json) => {
+        console.log(post_data);
+        $('article').remove();
+        for (const place of json) {
+        // Generate the HTML to be appended under the .places section
+          const object = `
+        <article>
+      	  <div class="title_box">
+      	    <h2>${place.name}</h2>
+      	    <div class="price_by_night">$${place.price_by_night}</div>
+      	  </div>
+      	  <div class="information">
+            <div class="max_guest">${place.max_guest} Guest${singularPlural(place.max_guest)}</div>
+            <div class="number_rooms">${place.number_rooms} Bedroom${singularPlural(place.number_rooms)}</div>
+            <div class="number_bathrooms">${place.number_bathrooms} Bathroom${singularPlural(place.number_bathrooms)}</div>
+      	  </div>
+          <div class="description">${place.description}</div>
+      	</article>`;
+
+          // Append the HTML generated above to the .places section
+          $('.places').append(object);
+        }
+      });
+    });
   });
 });
